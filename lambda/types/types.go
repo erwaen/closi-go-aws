@@ -16,6 +16,27 @@ type User struct {
 	PasswordHash string `json:"password"`
 }
 
+type Device struct {
+	DeviceID   string `json:"deviceid"`
+	DateJoined string `json:"datejoined"`
+	SessionID  string `json:"sessionid"`
+}
+
+type Session struct {
+	SessionID string `json:"sessionid"`
+	Device1ID string `json:"device1id"`
+	Device2ID string `json:"device2id"`
+}
+
+type Heart struct {
+	HeartID          string `json:"heartid"`
+	SenderDeviceID   string `json:"senderdeviceid"`
+	ReceiverDeviceID string `json:"receiverdeviceid"`
+	Timestamp        string `json:"timestamp"`
+    Seen             bool   `json:"seen"`
+    SeenTimestamp    int64  `json:"seentimestamp"`
+}
+
 func NewUser(registerUser RegisterUser) (User, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerUser.Password), 10)
 	if err != nil {
@@ -30,11 +51,6 @@ func NewUser(registerUser RegisterUser) (User, error) {
 
 func ValidatePassword(hashedPassword, plainTextPassword string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainTextPassword))
-	// if err != nil {
-	//     return false
-	// }
-
-	// return true
 	return err == nil
 
 }
@@ -53,9 +69,9 @@ func CreateToken(user User) string {
 
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
-        return ""
-        // fmt.Errorf("signingString error %w", err)
-        // return tokenString
+		return ""
+		// fmt.Errorf("signingString error %w", err)
+		// return tokenString
 	}
-    return tokenString
+	return tokenString
 }

@@ -20,3 +20,5 @@ cdk.out
 
 function.zip
 bootstrap
+lambda/bootstrap
+./lambda/function.zip

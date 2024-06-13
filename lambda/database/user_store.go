@@ -1,12 +1,11 @@
 package database
 
 import (
-	"lambda-func/types"
-    "fmt"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"lambda-func/types"
 )
 
 const (
@@ -14,23 +13,9 @@ const (
 )
 
 type UserStore interface {
-    DoesUserExist(username string) (bool, error)
-    InsertUser(user types.User) error
-    GetUser(username string) (types.User, error)
-}
-
-type DynamoDBClient struct {
-	databaseStore *dynamodb.DynamoDB
-}
-
-func NewDynamoDBClient() DynamoDBClient {
-	dbSession := session.Must(session.NewSession())
-	db := dynamodb.New(dbSession)
-
-
-	return DynamoDBClient{
-		databaseStore: db,
-	}
+	DoesUserExist(username string) (bool, error)
+	InsertUser(user types.User) error
+	GetUser(username string) (types.User, error)
 }
 
 // Does this user exists?
@@ -80,29 +65,29 @@ func (u DynamoDBClient) InsertUser(user types.User) error {
 }
 
 func (u DynamoDBClient) GetUser(username string) (types.User, error) {
-    var user types.User
+	var user types.User
 
-    result, err := u.databaseStore.GetItem(&dynamodb.GetItemInput{
-        TableName: aws.String(TABLE_NAME),
-        Key: map[string]*dynamodb.AttributeValue{
-            "username":{
-                S: aws.String(username),
-            },
-        },
-    })
+	result, err := u.databaseStore.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(TABLE_NAME),
+		Key: map[string]*dynamodb.AttributeValue{
+			"username": {
+				S: aws.String(username),
+			},
+		},
+	})
 
-    if err != nil {
-        return user, err
-    }
+	if err != nil {
+		return user, err
+	}
 
-    if result.Item == nil {
-        return user, fmt.Errorf("user not fount")
-    }
+	if result.Item == nil {
+		return user, fmt.Errorf("user not fount")
+	}
 
-    err = dynamodbattribute.UnmarshalMap(result.Item, &user)
-    if err != nil {
-        return user, err
-    }
-    
-    return user, nil
+	err = dynamodbattribute.UnmarshalMap(result.Item, &user)
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 }
