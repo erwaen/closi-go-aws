@@ -22,12 +22,20 @@ func NewGocdkStack(scope constructs.Construct, id string, props *GocdkStackProps
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
 	// create DB table here
-	table := awsdynamodb.NewTable(stack, jsii.String("myUserTable"), &awsdynamodb.TableProps{
+	userTable := awsdynamodb.NewTable(stack, jsii.String("myUserTable"), &awsdynamodb.TableProps{
 		PartitionKey: &awsdynamodb.Attribute{
 			Name: jsii.String("username"),
 			Type: awsdynamodb.AttributeType_STRING,
 		},
 		TableName: jsii.String("userTable"),
+	})
+
+	deviceTable := awsdynamodb.NewTable(stack, jsii.String("closiDeviceTable"), &awsdynamodb.TableProps{
+		PartitionKey: &awsdynamodb.Attribute{
+			Name: jsii.String("deviceid"),
+			Type: awsdynamodb.AttributeType_STRING,
+		},
+		TableName: jsii.String("closi_devices"),
 	})
 
 	myFunction := awslambda.NewFunction(stack, jsii.String("myLambdaFunction"), &awslambda.FunctionProps{
@@ -36,7 +44,8 @@ func NewGocdkStack(scope constructs.Construct, id string, props *GocdkStackProps
 		Handler: jsii.String("main"),
 	})
 
-	table.GrantReadWriteData(myFunction)
+	userTable.GrantReadWriteData(myFunction)
+	deviceTable.GrantReadWriteData(myFunction)
 
 	api := awsapigateway.NewRestApi(stack, jsii.String("myAPIGateway"), &awsapigateway.RestApiProps{
 		DefaultCorsPreflightOptions: &awsapigateway.CorsOptions{
@@ -44,21 +53,21 @@ func NewGocdkStack(scope constructs.Construct, id string, props *GocdkStackProps
 			AllowMethods: jsii.Strings("GET", "POST", "DELETE", "PUT", "OPTIONS"),
 			AllowOrigins: jsii.Strings("*"),
 		},
-        DeployOptions: &awsapigateway.StageOptions{
-            LoggingLevel: awsapigateway.MethodLoggingLevel_INFO,
-        },
+		DeployOptions: &awsapigateway.StageOptions{
+			LoggingLevel: awsapigateway.MethodLoggingLevel_INFO,
+		},
 	})
 
-    integration := awsapigateway.NewLambdaIntegration(myFunction, nil)
+	integration := awsapigateway.NewLambdaIntegration(myFunction, nil)
 
-    registerResource := api.Root().AddResource(jsii.String("register"), nil)
-    registerResource.AddMethod(jsii.String("POST"), integration, nil)
-    
-    loginResource := api.Root().AddResource(jsii.String("login"), nil)
-    loginResource.AddMethod(jsii.String("POST"), integration, nil)
+	registerResource := api.Root().AddResource(jsii.String("register"), nil)
+	registerResource.AddMethod(jsii.String("POST"), integration, nil)
 
-    protectedResource := api.Root().AddResource(jsii.String("protected"), nil)
-    protectedResource.AddMethod(jsii.String("GET"), integration, nil)
+	loginResource := api.Root().AddResource(jsii.String("login"), nil)
+	loginResource.AddMethod(jsii.String("POST"), integration, nil)
+
+	protectedResource := api.Root().AddResource(jsii.String("protected"), nil)
+	protectedResource.AddMethod(jsii.String("GET"), integration, nil)
 
 	return stack
 }

@@ -4,7 +4,7 @@ import (
     "lambda-func/types"
 )
 
-const DEVICE_TABLE = "deviceTable"
+const DEVICE_TABLE = "closi_devices"
 
 type DeviceStore interface {
     InsertDevice(device types.Device) error
