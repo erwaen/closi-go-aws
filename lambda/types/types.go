@@ -16,12 +16,6 @@ type User struct {
 	PasswordHash string `json:"password"`
 }
 
-type Device struct {
-	DeviceID   string `json:"deviceid"`
-	DateJoined string `json:"datejoined"`
-	SessionID  string `json:"sessionid"`
-}
-
 type Session struct {
 	SessionID string `json:"sessionid"`
 	Device1ID string `json:"device1id"`
