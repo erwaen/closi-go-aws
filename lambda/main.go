@@ -34,12 +34,13 @@ func main() {
 	lambda.Start(func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		switch request.Path {
 		case "/register":
-			return myApp.ApiHandler.RegisterUserHandler(request)
+			return myApp.ApiHandler.User.RegisterUserHandler(request)
 		case "/login":
-			return myApp.ApiHandler.LoginUser(request)
-
+			return myApp.ApiHandler.User.LoginUser(request)
 		case "/protected":
 			return middleware.ValidateJWTMiddleware(ProtectedHandler)(request)
+		case "/registerdevice":
+			return myApp.ApiHandler.Device.RegisterDeviceHandler(request)
 		default:
 			return events.APIGatewayProxyResponse{
 				Body:       "Not found",

@@ -11,11 +11,12 @@ import (
 const DEVICE_TABLE = "closi_devices"
 
 type DeviceStore interface {
+	DoesDeviceExist(deviceid string) (bool, error)
 	InsertDevice(device types.Device) error
-	GetDevice(deviceID string) (types.Device, error)
+	// GetDevice(deviceID string) (types.Device, error)
 }
 
-func (u DynamoDBClient) DoesUserExist(deviceid string) (bool, error) {
+func (u DynamoDBClient) DoesDeviceExist(deviceid string) (bool, error) {
 	result, err := u.databaseStore.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(DEVICE_TABLE),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -42,6 +43,9 @@ func (u DynamoDBClient) InsertDevice(device types.Device) error {
 		Item: map[string]*dynamodb.AttributeValue{
 			"deviceid": {
 				S: aws.String(device.DeviceID),
+			},
+			"devicetype": {
+				S: aws.String(device.DeviceType),
 			},
 			"datejoined": {
 				N: aws.String(fmt.Sprintf("%d", device.DateJoined)),

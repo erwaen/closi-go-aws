@@ -3,24 +3,23 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/aws/aws-lambda-go/events"
 	"lambda-func/database"
 	"lambda-func/types"
 	"net/http"
-
-	"github.com/aws/aws-lambda-go/events"
 )
 
-type ApiHandler struct {
+type UserApiHandler struct {
 	dbStore database.UserStore
 }
 
-func NewApiHandler(dbStore database.UserStore) ApiHandler {
-	return ApiHandler{
+func NewUserApiHandler(dbStore database.UserStore) UserApiHandler {
+	return UserApiHandler{
 		dbStore: dbStore,
 	}
 }
 
-func (api ApiHandler) RegisterUserHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (api UserApiHandler) RegisterUserHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	var registerUser types.RegisterUser
 
 	err := json.Unmarshal([]byte(request.Body), &registerUser)
@@ -78,7 +77,7 @@ func (api ApiHandler) RegisterUserHandler(request events.APIGatewayProxyRequest)
 	}, nil
 }
 
-func (api ApiHandler) LoginUser(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (api UserApiHandler) LoginUser(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	type LoginRequest struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -109,11 +108,11 @@ func (api ApiHandler) LoginUser(request events.APIGatewayProxyRequest) (events.A
 		}, nil
 	}
 
-    accessToken := types.CreateToken(user)
-    successMsg := fmt.Sprintf(`{"access_token": "%s"}`, accessToken)
+	accessToken := types.CreateToken(user)
+	successMsg := fmt.Sprintf(`{"access_token": "%s"}`, accessToken)
 
-    return events.APIGatewayProxyResponse {
-        Body:   successMsg ,
-        StatusCode: http.StatusOK,
-    }, nil
+	return events.APIGatewayProxyResponse{
+		Body:       successMsg,
+		StatusCode: http.StatusOK,
+	}, nil
 }
